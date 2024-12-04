@@ -2,6 +2,8 @@
 
 $lines = explode("\n", file_get_contents(__DIR__ . "/day04.txt"));
 
+$loopcount = 0;
+
 foreach ($lines as $i => $line) {
 	$lines[$i] = str_split($line);
 }
@@ -21,6 +23,7 @@ $directions = [
 ];
 
 function searchWord($lines, $x, $y, $lookingFor, $dir) {
+	// there are so many better ways to do this
 	$move = [ 'x' => 0, 'y' => 0 ];
 	if ($dir == "up") {
 		$move['y'] = -1;
@@ -70,6 +73,8 @@ function searchWord($lines, $x, $y, $lookingFor, $dir) {
 	return false;
 }
 
+$st = microtime(true);
+
 $wordCount = 0;
 foreach ($lines as $y => $line) {
 	foreach ($line as $x => $char) {
@@ -83,7 +88,10 @@ foreach ($lines as $y => $line) {
 	}
 }
 
+$en = microtime(true);
+
 echo "Part 1: {$wordCount}\n";
+echo "Runtime " . $en - $st . "s\n";
 
 function findXmas($lines, $x, $y, $col) {
 	/*
@@ -122,6 +130,8 @@ function findXmas($lines, $x, $y, $col) {
 	return findXmas($lines, $x, $y, $col + 1);
 }
 
+$st = microtime(true);
+
 $wordCount = 0;
 for ($y = 0; $y < count($lines) - 2; $y++) {
 	$line = $lines[$y];
@@ -137,5 +147,8 @@ for ($y = 0; $y < count($lines) - 2; $y++) {
 	}
 }
 
+$en = microtime(true);
+
 echo "Part 2: {$wordCount}\n";
+echo "Runtime " . $en - $st . "s\n";
 
