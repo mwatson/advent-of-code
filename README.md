@@ -24,5 +24,5 @@ php run.php 2024 3
 
 Plop a file into the year named `dayXX.php` where `XX` is the day number (`01`, `02`, `19`, `20`, and so on).
 
-The file should contain a class that implements the `Day` interface from `Day.php` from the root.
+The file should contain a class named `DayXX` that extends the `Day` abstract class in `Day.php` from the root. You need to implement two methods: `part1` and `part2`, which should return their respective outputs. Puzzle input will be stored as a single string in the protected `$data` property. You can do whatever else you want with the class as far as processing and shared code goes. You can throw an exception and it will bubble up to the try/catch in `run.php`.
 

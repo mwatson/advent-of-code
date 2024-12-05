@@ -12,5 +12,11 @@ array_shift($argv);
 
 [ $year, $day ] = $argv;
 
-$aoc = new AdventOfCode();
-
+try {
+	$aoc = new AdventOfCode($year, $day);
+	$aoc->exec();
+	$aoc->displayResults();
+} catch (Exception $e) {
+	echo "AoC Error: {$e->getMessage()}\n";
+	exit();
+}

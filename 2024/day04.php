@@ -1,26 +1,66 @@
 <?php
 
-$lines = explode("\n", file_get_contents(__DIR__ . "/day04.txt"));
+class Day04 extends Day
+{
+	protected $lines = [];
 
-$loopcount = 0;
+	public function part1()
+	{
+		$this->lines = explode("\n", $this->data);
 
-foreach ($lines as $i => $line) {
-	$lines[$i] = str_split($line);
+		$loopcount = 0;
+
+		foreach ($this->lines as $i => $line) {
+			$this->lines[$i] = str_split($line);
+		}
+
+		$directions = [
+			"up",
+			"upright",
+			"right",
+			"downright",
+			"down",
+			"downleft",
+			"left",
+			"upleft",
+		];
+
+		$wordCount = 0;
+		foreach ($this->lines as $y => $line) {
+			foreach ($line as $x => $char) {
+				if ($char == "X") {
+					foreach ($directions as $dir) {
+						if (searchWord($this->lines, $x, $y, "M", $dir)) {
+							$wordCount++;
+						}
+					}
+				}
+			}
+		}
+
+		return $wordCount;
+	}
+
+	public function part2()
+	{
+		$wordCount = 0;
+		for ($y = 0; $y < count($this->lines) - 2; $y++) {
+			$line = $this->lines[$y];
+			for ($x = 0; $x < count($line) - 2; $x++) {
+				$char = $line[$x];
+				if ($char != "M" && $char != "S") {
+					continue;
+				}
+
+				if (findXmas($this->lines, $x, $y, 0)) {
+					$wordCount++;
+				}
+			}
+		}
+
+		return $wordCount;
+	}
 }
-
-$width = count($lines[0]);
-$height = count($lines);
-
-$directions = [
-	"up",
-	"upright",
-	"right",
-	"downright",
-	"down",
-	"downleft",
-	"left",
-	"upleft",
-];
 
 function searchWord($lines, $x, $y, $lookingFor, $dir) {
 	// there are so many better ways to do this
@@ -73,26 +113,6 @@ function searchWord($lines, $x, $y, $lookingFor, $dir) {
 	return false;
 }
 
-$st = microtime(true);
-
-$wordCount = 0;
-foreach ($lines as $y => $line) {
-	foreach ($line as $x => $char) {
-		if ($char == "X") {
-			foreach ($directions as $dir) {
-				if (searchWord($lines, $x, $y, "M", $dir)) {
-					$wordCount++;
-				}
-			}
-		}
-	}
-}
-
-$en = microtime(true);
-
-echo "Part 1: {$wordCount}\n";
-echo "Runtime " . $en - $st . "s\n";
-
 function findXmas($lines, $x, $y, $col) {
 	/*
 	only possible combos:
@@ -129,26 +149,3 @@ function findXmas($lines, $x, $y, $col) {
 
 	return findXmas($lines, $x, $y, $col + 1);
 }
-
-$st = microtime(true);
-
-$wordCount = 0;
-for ($y = 0; $y < count($lines) - 2; $y++) {
-	$line = $lines[$y];
-	for ($x = 0; $x < count($line) - 2; $x++) {
-		$char = $line[$x];
-		if ($char != "M" && $char != "S") {
-			continue;
-		}
-
-		if (findXmas($lines, $x, $y, 0)) {
-			$wordCount++;
-		}
-	}
-}
-
-$en = microtime(true);
-
-echo "Part 2: {$wordCount}\n";
-echo "Runtime " . $en - $st . "s\n";
-

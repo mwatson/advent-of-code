@@ -1,52 +1,55 @@
 <?php
 
-//class Day01 implements Day
-//{
-//}
+class Day01 extends Day
+{
+	protected $left = [];
+	protected $right = [];
 
-$lines = explode("\n", file_get_contents("day01.txt"));
+	public function part1()
+	{
+		$lines = explode("\n", $this->data);
 
-$left = [];
-$right = [];
-foreach ($lines as $line) {
-	$chunks = array_values(array_filter(explode(" ", $line)));
-	if (count($chunks) != 2) {
-		continue;
+		foreach ($lines as $line) {
+			$chunks = array_values(array_filter(explode(" ", $line)));
+			if (count($chunks) != 2) {
+				continue;
+			}
+
+			$this->left[] = $chunks[0];
+			$this->right[] = $chunks[1];
+		}
+
+		if (count($this->left) != count($this->right)) {
+			throw new Exception("Sizes don't match");
+		}
+
+		$total = 0;
+		sort($this->left);
+		sort($this->right);
+
+		for ($i = 0; $i < count($this->left); $i++) {
+			$total += abs($this->left[$i] - $this->right[$i]);
+		}
+
+		return $total;
 	}
 
-	$left[] = $chunks[0];
-	$right[] = $chunks[1];
-}
+	public function part2()
+	{
+		$rightIndexed = [];
+		foreach ($this->right as $n) {
+			if (empty($rightIndexed[$n])) {
+				$rightIndexed[$n] = 0;
+			}
+			$rightIndexed[$n]++;
+		}
 
-if (count($left) != count($right)) {
-	echo "Sizes don't match\n";
-	die();
-}
+		$total = 0;
+		foreach ($this->left as $n) {
+			$rightTimes = $rightIndexed[$n] ?? 0;
+			$total += $rightTimes * $n;
+		}
 
-$total = 0;
-sort($left);
-sort($right);
-
-for ($i = 0; $i < count($left); $i++) {
-	$total += abs($left[$i] - $right[$i]);
-}
-
-echo "part 1: {$total}\n";
-
-$rightIndexed = [];
-foreach ($right as $n) {
-	if (empty($rightIndexed[$n])) {
-		$rightIndexed[$n] = 0;
+		return $total;
 	}
-	$rightIndexed[$n]++;
 }
-
-$total = 0;
-foreach ($left as $n) {
-	$rightTimes = $rightIndexed[$n] ?? 0;
-	$total += $rightTimes * $n;
-}
-
-echo "part 2: {$total}\n";
-
-
