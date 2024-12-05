@@ -1,5 +1,9 @@
 <?php
 
+//class Day01 implements Day
+//{
+//}
+
 $lines = explode("\n", file_get_contents("day01.txt"));
 
 $left = [];
