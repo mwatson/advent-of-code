@@ -3,29 +3,32 @@
 class Day06 extends Day
 {
 	protected $grid = [];
+	protected $walked = [];
+
+	protected $guardStart = [
+		'x' => 0,
+		'y' => 0,
+	];
 
 	public function part1()
 	{
 		$this->echoOn();
 
-		$x = 0;
-		$y = 0;
-
 		$lines = explode("\n", $this->data);
 		foreach ($lines as $line) {
 			if (strpos($line, '^') !== false) {
 				// guard position
-				$x = strpos($line, '^');
-				$y = count($this->grid);
+				$this->guardStart['x'] = strpos($line, '^');
+				$this->guardStart['y'] = count($this->grid);
 			}
 			$this->grid[] = str_split($line);
 		}
 
+		[ 'x' => $x, 'y' => $y ] = $this->guardStart;
+
 		$this->grid[$y][$x] = '.';
 
-		$walked = [
-			"{$x}-{$y}" => true,
-		];
+		$this->walked[$y][$x] = 1;
 
 		$guard = [
 			'x' => $x,
@@ -34,12 +37,55 @@ class Day06 extends Day
 			'dirY' => -1,
 		];
 
-		while (1) {
+		$this->walkTheWalk($guard);
+
+		$walked = 0;
+		foreach ($this->walked as $walkY) {
+			$walked += count($walkY);
+		}
+
+		//print_r($this->walked);
+
+		return $walked;
+	}
+
+	public function part2()
+	{
+		$guard = [
+			'x' => $this->guardStart['x'],
+			'y' => $this->guardStart['y'],
+			'dirX' => 0,
+			'dirY' => -1,
+		];
+
+		$loopers = 0;
+
+		foreach ($this->walked as $y => $walkRow) {
+			foreach ($walkRow as $x => $times) {
+				$this->grid[$y][$x] = '#';
+
+				if (!$this->walkTheWalk($guard, false)) {
+					$loopers++;
+				}
+
+				$this->grid[$y][$x] = '.';
+			}
+		}
+
+		return $loopers;
+	}
+
+	protected function walkTheWalk($guard, $trackWalks = true)
+	{
+		// this is stupid
+		$loops = 7000;
+
+		while ($loops--) {
 			[ $newX, $newY ] = $this->getNextTile($guard);
 
-			// guard has left (assume this always happens)
+			// guard has left
 			if ($this->isOutOfBounds($newX, $newY)) {
-				break;
+				return true;
 			}
 
 			if ($this->canWalk($newX, $newY)) {
@@ -47,7 +93,13 @@ class Day06 extends Day
 				$guard['x'] = $newX;
 				$guard['y'] = $newY;
 
-				$walked["{$newX}-{$newY}"] = true;
+				if ($trackWalks) {
+					if (isset($this->walked[$newY][$newX])) {
+						$this->walked[$newY][$newX]++;
+					} else {
+						$this->walked[$newY][$newX] = 1;
+					}
+				}
 
 			} else {
 				// otherwise turn right
@@ -65,7 +117,8 @@ class Day06 extends Day
 			}
 		}
 
-		return count($walked);
+		// we never exited
+		return false;
 	}
 
 	protected function getNextTile($guard)
@@ -88,10 +141,5 @@ class Day06 extends Day
 	protected function canWalk($x, $y)
 	{
 		return $this->grid[$y][$x] == '.';
-	}
-
-	public function part2()
-	{
-		return 0;
 	}
 }
