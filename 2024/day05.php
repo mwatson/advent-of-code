@@ -26,15 +26,18 @@ class Day05 extends Day
 		    }
 		}
 
+        //$jobs = [ [ 79, 56, 89, 77, 78 ] ]; // invalid
+        //$jobs = [ [ 78, 89, 77, 56, 79 ] ]; // valid
+
 		sort($rules);
 
 		foreach ($rules as $rule) {
-		    [ $x, $y ] = explode('|', $rule);
-		    if (empty($combined[$x])) {
-		        $this->combined[$x] = [];
+		    [ $first, $second ] = explode('|', $rule);
+		    if (empty($this->combined[$first])) {
+		        $this->combined[$first] = [];
 		    }
 
-		    $this->combined[$x][$y] = true;
+		    $this->combined[$first][$second] = true;
 		}
 
 		$total = 0;
@@ -65,7 +68,10 @@ class Day05 extends Day
 		    }
 
 		    if ($validJob) {
-		    	$total += $job[floor(count($job) / 2)];
+                $idx = floor(count($job) / 2);
+                $v = $job[$idx];
+                //$this->echo('valid: [' . implode(' ', $job) . "] {$idx}=>{$v}\n");
+		    	$total += $job[$idx];
 		    } else {
 		    	$this->invalidJobs[] = $job;
 		    }
@@ -81,72 +87,56 @@ class Day05 extends Day
 		// this could be done as part of the above loop,
 		// but doing it here just to make things easier
 
-		// 41 42 99 65 12 should be
+		// 79, 56, 89, 77, 78 should be
+        // 78, 89, 77, 56, 79 (I think?)
 
-		//$this->invalidJobs = [ [ 41, 42, 99, 65, 12 ] ];
+        /*
+        Progression:
+
+        56 -> 79
+
+        89 -> 56 -> 79
+           -> 77
+
+        89 -> 77 -> 56 -> 79
+
+        78 -> 89 -> 77 -> 56 -> 79
+           -> 56
+           -> 77
+           -> 79
+           -> 89
+        */
+    
+		$this->invalidJobs = [ [ 79, 56, 89, 77, 78 ] ];
 
 		$total = 0;
 
-		foreach ($this->invalidJobs as &$job) {
-			$moves = [];
-			foreach ($job as $i => $pageNum) {
-		    	$list = $this->combined[$pageNum];
+		foreach ($this->invalidJobs as $job) {
+            $fixedJob = [];
 
-		    	// look at everything before $job[$i] (this might be nothing)
-		    	for ($x = 0; $x < $i; $x++) {
-		    		$page = $job[$x];
-		    		// if this page is on THE LIST
-		    		if (!empty($list[$page])) {
-		    			// we need to move it here (before it)
-		    			$moves[$i] = $x;
-		    		}
-		    	}
-		    }
+            $pages = [];
+            $fJob = array_flip($job);
+            foreach ($job as $page) {
+                $pageData = [
+                    'page' => $page,
+                    'after' => [],
+                ];
 
-		    print_r($moves);
+                foreach ($this->combined[$page] as $after => $_) {
+                    if (isset($fJob[$after])) {
+                        $pageData['after'][] = $after;
+                    }
+                }
 
-		    $this->echo("[ " . implode(' ', $job) . " ] ->\n");
+                $pages[] = $pageData;
+            }
 
-		    /*
-		    $newJob = [];
-			foreach ($job as $i => $pageNum) {
-				if (empty($moves[$i])) {
-					$newJob[] = $pageNum;
-				} else {
-					$newJob = array_merge(
-						array_slice($newJob, 0, $moves[$i] - 1),
-						[ $pageNum ],
-						array_slice($newJob, $moves[$i])
-					);
-				}
-			}
-			*/
-
-			//$job = $newJob;
-
-		    foreach ($moves as $x => $before) {
-		    	$moveThis = $job[$x];
-		    	
-		    	//
-
-		    	unset($job[$x]);
-		    	$job = array_values($job);
-
-		    	$job = array_merge(
-		    		array_slice($job, 0, $before ),
-		    		[ $moveThis ],
-		    		array_slice($job, $before )
-		    	);
-
-		    	//array_splice($job, $x + 1, 1);
-		    }
-
-		    $this->echo("[ " . implode(' ', $job) . " ]\n============\n");
+            print_r($pages);
 
 		    $total += $job[floor(count($job) / 2)];
-
-		    return $total;
 		}
+
+        return $total;
 	}
 }
 
