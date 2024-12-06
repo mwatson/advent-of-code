@@ -114,11 +114,13 @@ class Day05 extends Day
             	return count($a['after']) < count($b['after']) ? -1 : 1;
             });
 
+            /*
             $fixedJob = array_map(function($item) {
             	return $item['page'];
             }, $pages);
+            */
 
-		    $total += $fixedJob[floor(count($fixedJob) / 2)];
+		    $total += $pages[floor(count($pages) / 2)]['page'];
 		}
 
         return $total;
