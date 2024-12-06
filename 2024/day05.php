@@ -82,38 +82,16 @@ class Day05 extends Day
 
 	public function part2()
 	{
-		$this->echoOn();
+		//$this->echoOn();
 
 		// this could be done as part of the above loop,
-		// but doing it here just to make things easier
-
-		// 79, 56, 89, 77, 78 should be
-        // 78, 89, 77, 56, 79 (I think?)
-
-        /*
-        Progression:
-
-        56 -> 79
-
-        89 -> 56 -> 79
-           -> 77
-
-        89 -> 77 -> 56 -> 79
-
-        78 -> 89 -> 77 -> 56 -> 79
-           -> 56
-           -> 77
-           -> 79
-           -> 89
-        */
+		// but doing it here just to make things clearer
     
-		$this->invalidJobs = [ [ 79, 56, 89, 77, 78 ] ];
+		//$this->invalidJobs = [ [ 79, 56, 89, 77, 78 ] ];
 
 		$total = 0;
 
 		foreach ($this->invalidJobs as $job) {
-            $fixedJob = [];
-
             $pages = [];
             $fJob = array_flip($job);
             foreach ($job as $page) {
@@ -131,9 +109,16 @@ class Day05 extends Day
                 $pages[] = $pageData;
             }
 
-            print_r($pages);
+            // this feels a little like cheating
+            usort($pages, function($a, $b) {
+            	return count($a['after']) < count($b['after']) ? -1 : 1;
+            });
 
-		    $total += $job[floor(count($job) / 2)];
+            $fixedJob = array_map(function($item) {
+            	return $item['page'];
+            }, $pages);
+
+		    $total += $fixedJob[floor(count($fixedJob) / 2)];
 		}
 
         return $total;
