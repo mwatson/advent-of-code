@@ -16,7 +16,7 @@ class Day08 extends Day
         $this->height = count($lines);
         $this->width = strlen($lines[0]);
 
-        $this->echo("height: {$height} x width: {$width}\n");
+        $this->echo("height: {$this->height} x width: {$this->width}\n");
 
         foreach ($lines as $y => $line) {
             for ($x = 0; $x < strlen($line); $x++) {
@@ -71,7 +71,7 @@ class Day08 extends Day
 
     public function part2()
     {
-        $this->echoOn();
+        //$this->echoOn();
 
         $validAntiNodes = [];
 
