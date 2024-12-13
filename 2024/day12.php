@@ -37,6 +37,17 @@ class Day12 extends Day
     {
 		$this->echoOn();
 
+        $this->data = "RRRRIICCFF
+RRRRIICCCF
+VVRRRCCFFF
+VVRCCCJFFF
+VVVVCJJCFE
+VVIVCCJJEE
+VVIIICJJEE
+MIIIIIJJEE
+MIIISIJEEE
+MMMISSJEEE";
+
 		$grid = $this->getGrid();
 
 		$cost = 0;
@@ -51,32 +62,52 @@ class Day12 extends Day
 
 				$totalSides = 0;
 
-				// instead of counting $sides, let's make the smallest square this piece can fit in
-				$min = [ 'x' => false, 'y' => false ];
-				$max = [ 'x' => false, 'y' => false ];
+                $blocks = [];
 				foreach ($result as $idx => $sides) {
 					[ $xIdx, $yIdx ] = explode("-", $idx);
-
-					// get mins and maxes
-					if ($min['x'] === false || $xIdx < $min['x']) {
-						$min['x'] = $xIdx;
-					}
-					if ($min['y'] === false || $yIdx < $min['y']) {
-						$min['y'] = $yIdx;
-					}
-					if ($max['x'] === false || $xIdx > $max['x']) {
-						$max['x'] = $xIdx;
-					}
-					if ($max['y'] === false || $yIdx > $max['y']) {
-						$max['y'] = $yIdx;
-					}
-					
+                    $blocks[$yIdx][$xIdx] = true;
 
 					// still do this so we can process subsequent pieces
 					$grid[$yIdx][$xIdx] = ".";
 				}
 
-				$cost += count($result) * $totalSides;
+                ksort($blocks);
+                foreach ($blocks as $by => $row) {
+                    ksort($blocks[$by]);
+                }
+
+                $topScan = 0;
+                foreach ($blocks as $by => $row) {
+                    $this->echo("[ " . implode(' ', $row) . " ]\n");
+                    $edges = 0;
+                    $lastX = -1;
+                    foreach ($row as $bx => $b) {
+                        if (!empty($blocks[$by - 1][$bx])) {
+                            continue;
+                        }
+                        if ($lastX == -1) {
+                            $edges++;
+                            $lastX = $bx;
+                        }
+                        if ($lastX + 1 < $bx) {
+                            $lastX = -1;
+                        } else {
+                            $lastX = $bx;
+                        }
+                    }
+
+                    $this->echo("Edges: {$edges}\n");
+
+                    // RRRR
+                    // RRRR
+                    //   RRR
+                    //   R
+                }
+
+                //print_r($blocks);
+                die;
+
+				//$cost += count($result) * $totalSides;
 			}
 
 			//$this->printGrid($grid);
