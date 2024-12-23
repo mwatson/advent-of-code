@@ -48,12 +48,34 @@ MIIIIIJJEE
 MIIISIJEEE
 MMMISSJEEE";
 
+// RRRR   2 top, 3 bottom, 3 left, 2 right = 10
+// RRRR
+//   RRR
+//   R
+
+/*
+......CC    top: 5, bottom: 6, left: 5, right: 6 = 22
+......CCC
+.....CC
+...CCC
+....C
+....CC
+.....C
+
+........FF  top: 2, bottom: 4, left: 4, right 2 = 12
+.........F
+.......FFF
+.......FFF
+........F
+*/
+
 		$grid = $this->getGrid();
 
 		$cost = 0;
 
 		for ($y = 0; $y < count($grid); $y++) {
 			for ($x = 0; $x < count($grid[$y]); $x++) {
+                $og = $grid[$y][$x];
 				if ($grid[$y][$x] == '.') {
 					continue;
 				}
@@ -62,55 +84,136 @@ MMMISSJEEE";
 
 				$totalSides = 0;
 
-                $blocks = [];
+                $xBlocks = [];
+                $yBlocks = [];
 				foreach ($result as $idx => $sides) {
 					[ $xIdx, $yIdx ] = explode("-", $idx);
-                    $blocks[$yIdx][$xIdx] = true;
+                    $yBlocks[$yIdx][$xIdx] = true;
+                    $xBlocks[$xIdx][$yIdx] = true;
 
 					// still do this so we can process subsequent pieces
 					$grid[$yIdx][$xIdx] = ".";
 				}
 
-                ksort($blocks);
-                foreach ($blocks as $by => $row) {
-                    ksort($blocks[$by]);
+                ksort($xBlocks);
+                foreach ($xBlocks as $bx => $col) {
+                    ksort($xBlocks[$bx]);
                 }
 
+                ksort($yBlocks);
+                foreach ($yBlocks as $by => $row) {
+                    ksort($yBlocks[$by]);
+                }
+
+                $totalEdges = 0;
+
                 $topScan = 0;
-                foreach ($blocks as $by => $row) {
-                    $this->echo("[ " . implode(' ', $row) . " ]\n");
-                    $edges = 0;
-                    $lastX = -1;
-                    foreach ($row as $bx => $b) {
-                        if (!empty($blocks[$by - 1][$bx])) {
-                            continue;
-                        }
-                        if ($lastX == -1) {
-                            $edges++;
-                            $lastX = $bx;
-                        }
-                        if ($lastX + 1 < $bx) {
-                            $lastX = -1;
+                $botScan = 0;
+
+                // scan down: 
+                // * count groups of adjacent blocks w/no block above (y = -1)
+                // scan up:
+                // * count groups of adjacent blocks w/no block below (y = +1)
+                foreach ($yBlocks as $yB => $row) {
+                    $lastDown = -1;
+                    $lastUp = -1;
+                    $borders = 0;
+
+                    foreach ($row as $xB => $v) {
+                        // scan down
+                        if (empty($yBlocks[$yB - 1][$xB])) {
+                            if ($lastDown == -1) {
+                                $borders++;
+                                $topScan++;
+                                $lastDown = $xB;
+                            } else if ($lastDown + 1 != $xB) {
+                                $lastDown = -1;
+                            } else {
+                                $lastDown = $xB;
+                            }
                         } else {
-                            $lastX = $bx;
+                            $lastDown = -1;
+                        }
+
+                        // scan up
+                        if (empty($yBlocks[$yB + 1][$xB])) {
+                            //echo "VALID BLOCK {$xB}, {$yB} [{$lastUp}]\n";
+                            if ($lastUp == -1) {
+                                $borders++;
+                                $botScan++;
+                                //echo "BORDER++ ({$xB}, {$yB})\n";
+                                $lastUp = $xB;
+                            } else if ($lastUp - 1 != $xB) {
+                                $lastUp = -1;
+                            } else {
+                                $lastUp = $xB;
+                            }
+                        } else {
+                            $lastUp = -1;
                         }
                     }
 
-                    $this->echo("Edges: {$edges}\n");
-
-                    // RRRR
-                    // RRRR
-                    //   RRR
-                    //   R
+                    $totalEdges += $borders;
                 }
 
-                //print_r($blocks);
-                die;
+                //echo "TOP: {$topScan}, BOT: {$botScan}\n";
 
-				//$cost += count($result) * $totalSides;
+                $rScan = 0;
+                $lScan = 0;
+
+                // scan right:
+                // * count groups of adjacent blocks w/no block to left (x = -1)
+                // scan left:
+                // * count groups of adjacent blocks w/no block to right (x = +1)
+                foreach ($xBlocks as $xB => $col) {
+                    $lastRight = -1;
+                    $lastLeft = -1;
+                    $borders = 0;
+                    foreach ($col as $yB => $v) {
+                        // scan right
+                        if (empty($xBlocks[$xB - 1][$yB])) {
+                            if ($lastRight == -1) {
+                                $borders++;
+                                $rScan++;
+                                $lastRight = $yB;
+                            } else if ($lastRight + 1 != $yB) {
+                                $lastRight = -1;
+                            } else {
+                                $lastRight = $yB;
+                            }
+                        } else {
+                            $lastRight = -1;
+                        }
+
+                        // scan left
+                        if (empty($xBlocks[$xB + 1][$yB])) {
+                            if ($lastLeft == -1) {
+                                $borders++;
+                                $lScan++;
+                                $lastLeft = $yB;
+                            } else if ($lastLeft - 1 != $yB) {
+                                $lastLeft = -1;
+                            } else {
+                                $lastLeft = $yB;
+                            }
+                        } else {
+                            $lastLeft = -1;
+                        }
+                    }
+
+                    //echo "L/R {$borders}\n";
+
+                    $totalEdges += $borders;
+                }
+
+                echo "L: {$lScan}, R: {$rScan} ({$og})\n";
+
+                $this->echo("Edges {$og}: {$totalEdges}\n");
+
+				$cost += count($result) * $totalEdges;
+
+                //$this->printGrid($grid);
 			}
-
-			//$this->printGrid($grid);
 		}
 
     	return $cost;

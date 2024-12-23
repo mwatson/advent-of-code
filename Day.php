@@ -39,6 +39,11 @@ abstract class Day
 		}
 	}
 
+    final protected function echoLine(string $line)
+    {
+        $this->echo("{$line}\n");
+    }
+
 	abstract public function part1();
 	abstract public function part2();
 }
